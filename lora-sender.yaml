@@ -41,13 +41,7 @@ i2c:
   frequency: 400kHz
   scan: true
 
-# A Switch in Home Assistant to toggle the display
-switch:
-  - platform: template
-    name: "Sender OLED Display"
-    id: oled_switch
-    optimistic: true
-    restore_mode: RESTORE_DEFAULT_ON
+
 
 font:
   - file: "gfonts://Roboto"
@@ -60,8 +54,8 @@ display:
     address: 0x3C
     id: oled_display
     lambda: |-
-      // Only draw to the screen if the HA switch is ON
-      if (id(oled_switch).state) {
+      // Only draw to the screen if the Receiver tells us to over LoRa
+      if (id(receiver_oled_command).state) {
         it.print(0, 0, id(font1), "Sender Active");
         
         // Print the uptime just so there is something moving
@@ -113,4 +107,12 @@ sensor:
     provider: "lora-receiver"
     remote_id: "lora_rssi"
     id: receiver_rssi
+    internal: true
+
+binary_sensor:
+  - platform: packet_transport
+    name: "Receiver OLED Command"
+    provider: "lora-receiver"
+    remote_id: "lora_oled_state"
+    id: receiver_oled_command
     internal: true

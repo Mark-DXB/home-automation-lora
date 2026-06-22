@@ -104,12 +104,14 @@ sx126x:
       - lambda: |-
           id(lora_rssi).publish_state(rssi);
 
-# Use the radio to receive packets
+# Use the radio to receive packets AND broadcast RSSI
 packet_transport:
   platform: sx126x
   sx126x_id: lora_radio
   sensors:
     - lora_rssi
+  binary_sensors:
+    - lora_oled_state
 
 globals:
   - id: last_heard
@@ -121,6 +123,26 @@ text_sensor:
     ip_address:
       id: ip_address
       internal: true
+
+switch:
+  - platform: template
+    name: "Sender OLED Display (via LoRa)"
+    id: lora_oled_switch
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - binary_sensor.template.publish:
+          id: lora_oled_state
+          state: ON
+    on_turn_off:
+      - binary_sensor.template.publish:
+          id: lora_oled_state
+          state: OFF
+
+binary_sensor:
+  - platform: template
+    id: lora_oled_state
+    internal: true
 
 sensor:
   - platform: template
