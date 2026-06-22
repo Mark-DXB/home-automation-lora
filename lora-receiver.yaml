@@ -65,8 +65,8 @@ display:
       }
       
       // Print Local WiFi Signal Strength
-      if (id(wifi_signal).has_state()) {
-        it.printf(0, 52, id(font_small), "WiFi: %.0f dBm", id(wifi_signal).state);
+      if (id(local_wifi_signal).has_state()) {
+        it.printf(0, 52, id(font_small), "WiFi: %.0f dBm", id(local_wifi_signal).state);
       }
 
 spi:
@@ -109,7 +109,7 @@ text_sensor:
 
 sensor:
   - platform: wifi_signal
-    id: wifi_signal
+    id: local_wifi_signal
     internal: true
 
   # Catch the sensor data coming from the Sender's node name
