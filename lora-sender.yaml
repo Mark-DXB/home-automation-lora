@@ -8,7 +8,18 @@ esphome:
   on_boot:
     priority: 1000
     then:
-      - output.turn_on: vext_power
+      - lambda: |-
+          // 1. Hard power the OLED via VEXT
+          pinMode(36, OUTPUT);
+          digitalWrite(36, LOW);
+          delay(100);
+          
+          // 2. Hard Reset the OLED controller
+          pinMode(21, OUTPUT);
+          digitalWrite(21, LOW);
+          delay(50);
+          digitalWrite(21, HIGH);
+          delay(100);
 
 esp32:
   board: esp32-s3-devkitc-1
@@ -24,27 +35,38 @@ wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
 
-output:
-  - platform: gpio
-    pin: GPIO36
-    id: vext_power
-    inverted: true
-
 i2c:
   sda: GPIO17
   scl: GPIO18
+  frequency: 400kHz
+  scan: true
 
-display:
-  - platform: ssd1306_i2c
-    model: "SSD1306 128x64"
-    address: 0x3C
-    lambda: |-
-      it.print(0, 0, id(font1), "Sender Active");
+# A Switch in Home Assistant to toggle the display
+switch:
+  - platform: template
+    name: "Sender OLED Display"
+    id: oled_switch
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
 
 font:
   - file: "gfonts://Roboto"
     id: font1
     size: 20
+
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x64"
+    address: 0x3C
+    id: oled_display
+    lambda: |-
+      // Only draw to the screen if the switch is ON
+      if (id(oled_switch).state) {
+        it.print(0, 0, id(font1), "Sender Active");
+        
+        // Print the uptime just so there is something moving
+        it.printf(0, 30, id(font1), "Up: %.0fs", id(uptime_sensor).state);
+      }
 
 spi:
   clk_pin: GPIO9
