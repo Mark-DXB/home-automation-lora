@@ -9,11 +9,7 @@ esphome:
     priority: 1000
     then:
       - output.turn_on: vext_power
-      - delay: 20ms
-      - output.turn_off: oled_reset
-      - delay: 20ms
-      - output.turn_on: oled_reset
-      - delay: 50ms
+      - delay: 100ms
 
 esp32:
   board: esp32-s3-devkitc-1
@@ -34,9 +30,6 @@ output:
     pin: GPIO36
     id: vext_power
     inverted: true
-  - platform: gpio
-    pin: GPIO21
-    id: oled_reset
 
 i2c:
   sda: GPIO17
@@ -54,6 +47,7 @@ display:
   - platform: ssd1306_i2c
     model: "SSD1306 128x64"
     address: 0x3C
+    reset_pin: GPIO21
     lambda: |-
       // Print Remote Sensor Data
       if (id(remote_uptime).has_state()) {
