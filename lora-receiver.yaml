@@ -99,11 +99,17 @@ sx126x:
   rf_switch: true
   tcxo_voltage: 1_8V
   tcxo_delay: 5ms
+  on_packet:
+    then:
+      - lambda: |-
+          id(lora_rssi).publish_state(rssi);
 
 # Use the radio to receive packets
 packet_transport:
   platform: sx126x
   sx126x_id: lora_radio
+  sensors:
+    - lora_rssi
 
 globals:
   - id: last_heard
@@ -117,6 +123,15 @@ text_sensor:
       internal: true
 
 sensor:
+  - platform: template
+    name: "LoRa Link RSSI"
+    id: lora_rssi
+    unit_of_measurement: "dBm"
+    device_class: signal_strength
+    state_class: measurement
+    accuracy_decimals: 0
+    update_interval: never
+
   - platform: wifi_signal
     id: local_wifi_signal
     internal: true

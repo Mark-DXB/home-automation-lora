@@ -60,12 +60,18 @@ display:
     address: 0x3C
     id: oled_display
     lambda: |-
-      // Only draw to the screen if the switch is ON
+      // Only draw to the screen if the HA switch is ON
       if (id(oled_switch).state) {
         it.print(0, 0, id(font1), "Sender Active");
         
         // Print the uptime just so there is something moving
-        it.printf(0, 30, id(font1), "Up: %.0fs", id(uptime_sensor).state);
+        it.printf(0, 20, id(font1), "Up: %.0fs", id(uptime_sensor).state);
+
+        if (id(receiver_rssi).has_state()) {
+          it.printf(0, 40, id(font1), "RSSI: %.0f dBm", id(receiver_rssi).state);
+        } else {
+          it.print(0, 40, id(font1), "Waiting for Reply...");
+        }
       }
 
 spi:
@@ -101,3 +107,10 @@ sensor:
   - platform: uptime
     id: uptime_sensor
     update_interval: 10s
+
+  - platform: packet_transport
+    name: "Receiver RSSI"
+    provider: "lora-receiver"
+    remote_id: "lora_rssi"
+    id: receiver_rssi
+    internal: true
