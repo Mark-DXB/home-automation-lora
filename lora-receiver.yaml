@@ -34,6 +34,8 @@ output:
 i2c:
   sda: GPIO17
   scl: GPIO18
+  frequency: 400kHz
+  scan: true
 
 font:
   - file: "gfonts://Roboto"
