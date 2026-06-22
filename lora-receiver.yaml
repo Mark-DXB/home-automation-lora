@@ -1,0 +1,82 @@
+substitutions:
+  name: "lora-receiver"
+  friendly_name: "LoRa Receiver Node"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  on_boot:
+    priority: 1000
+    then:
+      - output.turn_on: vext_power
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: arduino
+
+logger:
+api:
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+output:
+  - platform: gpio
+    pin: GPIO36
+    id: vext_power
+    inverted: true
+
+i2c:
+  sda: GPIO17
+  scl: GPIO18
+
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x64"
+    address: 0x3C
+    lambda: |-
+      it.print(0, 0, id(font1), "Receiver Active");
+
+font:
+  - file: "gfonts://Roboto"
+    id: font1
+    size: 20
+
+spi:
+  clk_pin: GPIO9
+  mosi_pin: GPIO10
+  miso_pin: GPIO11
+
+# The Radio Hardware
+sx126x:
+  id: lora_radio
+  cs_pin: GPIO8
+  rst_pin: GPIO12
+  busy_pin: GPIO13
+  dio1_pin: GPIO14
+  hw_version: sx1262
+  modulation: LORA
+  frequency: 868MHz
+  bandwidth: 125_0kHz
+  spreading_factor: 7
+  coding_rate: CR_4_5
+  rf_switch: true
+  tcxo_voltage: 1_8V
+  tcxo_delay: 5ms
+
+# Use the radio to receive packets
+packet_transport:
+  platform: sx126x
+  sx126x_id: lora_radio
+
+# Catch the sensor data coming from the Sender's node name
+sensor:
+  - platform: packet_transport
+    name: "Remote Node Uptime"
+    provider: "lora-sender"
+    remote_id: "uptime_sensor"
+    internal: false
