@@ -34,17 +34,40 @@ i2c:
   sda: GPIO17
   scl: GPIO18
 
+font:
+  - file: "gfonts://Roboto"
+    id: font_large
+    size: 20
+  - file: "gfonts://Roboto"
+    id: font_small
+    size: 12
+
 display:
   - platform: ssd1306_i2c
     model: "SSD1306 128x64"
     address: 0x3C
     lambda: |-
-      it.print(0, 0, id(font1), "Receiver Active");
+      // Print Remote Sensor Data
+      if (id(remote_uptime).has_state()) {
+        it.printf(0, 0, id(font_large), "Data: %.0f", id(remote_uptime).state);
+        
+        // Print Time Since Last Received
+        uint32_t now = millis() / 1000;
+        uint32_t seconds_ago = now - id(last_heard);
+        it.printf(0, 24, id(font_small), "Last seen: %d sec ago", seconds_ago);
+      } else {
+        it.print(0, 0, id(font_large), "Waiting for LoRa...");
+      }
 
-font:
-  - file: "gfonts://Roboto"
-    id: font1
-    size: 20
+      // Print Local IP Address
+      if (id(ip_address).has_state()) {
+        it.printf(0, 40, id(font_small), "IP: %s", id(ip_address).state.c_str());
+      }
+      
+      // Print Local WiFi Signal Strength
+      if (id(wifi_signal).has_state()) {
+        it.printf(0, 52, id(font_small), "WiFi: %.0f dBm", id(wifi_signal).state);
+      }
 
 spi:
   clk_pin: GPIO9
@@ -73,10 +96,30 @@ packet_transport:
   platform: sx126x
   sx126x_id: lora_radio
 
-# Catch the sensor data coming from the Sender's node name
+globals:
+  - id: last_heard
+    type: uint32_t
+    initial_value: '0'
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      id: ip_address
+      internal: true
+
 sensor:
+  - platform: wifi_signal
+    id: wifi_signal
+    internal: true
+
+  # Catch the sensor data coming from the Sender's node name
   - platform: packet_transport
     name: "Remote Node Uptime"
     provider: "lora-sender"
     remote_id: "uptime_sensor"
+    id: remote_uptime
     internal: false
+    on_value:
+      - globals.set:
+          id: last_heard
+          value: !lambda "return millis() / 1000;"
