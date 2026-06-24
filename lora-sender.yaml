@@ -35,6 +35,8 @@ wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
 
+esp32_ble_tracker:
+
 i2c:
   sda: GPIO17
   scl: GPIO18
@@ -96,11 +98,22 @@ packet_transport:
   sx126x_id: lora_radio
   sensors:
     - uptime_sensor
+    - inkbird_temperature
+    - inkbird_battery
 
 sensor:
   - platform: uptime
     id: uptime_sensor
     update_interval: 10s
+
+  - platform: inkbird_ibsth1_mini
+    mac_address: "49:24:06:18:05:7C"
+    temperature:
+      name: "Inkbird Temperature"
+      id: inkbird_temperature
+    battery_level:
+      name: "Inkbird Battery"
+      id: inkbird_battery
 
   - platform: packet_transport
     name: "Receiver RSSI"

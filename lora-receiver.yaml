@@ -169,3 +169,25 @@ sensor:
       - globals.set:
           id: last_heard
           value: !lambda "return millis() / 1000;"
+
+  - platform: packet_transport
+    name: "Field Temperature"
+    provider: "lora-sender"
+    remote_id: "inkbird_temperature"
+    id: remote_temperature
+    internal: false
+    device_class: temperature
+    state_class: measurement
+    unit_of_measurement: "°C"
+
+
+
+  - platform: packet_transport
+    name: "Field Battery"
+    provider: "lora-sender"
+    remote_id: "inkbird_battery"
+    id: remote_battery
+    internal: false
+    device_class: battery
+    state_class: measurement
+    unit_of_measurement: "%"
