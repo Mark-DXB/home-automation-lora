@@ -108,8 +108,8 @@ sx126x:
 packet_transport:
   platform: sx126x
   sx126x_id: lora_radio
-  security:
-    - key: "JabsAllotmentLoRaSecurityKey2026!"
+  encryption:
+    key: "JabsAllotmentLoRaSecurityKey2026!"
   sensors:
     - lora_rssi
   binary_sensors:
