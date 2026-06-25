@@ -97,7 +97,7 @@ packet_transport:
   platform: sx126x
   sx126x_id: lora_radio
   encryption:
-    key: "JabsAllotmentLoRaSecurityKey2026!"
+    key: !secret lora_encryption_key
   sensors:
     - uptime_sensor
     - inkbird_temperature
