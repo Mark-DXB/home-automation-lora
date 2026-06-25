@@ -110,6 +110,10 @@ packet_transport:
   sx126x_id: lora_radio
   encryption:
     key: !secret lora_encryption_key
+  providers:
+    - name: "lora-sender"
+      encryption:
+        key: !secret lora_encryption_key
   sensors:
     - lora_rssi
   binary_sensors:
