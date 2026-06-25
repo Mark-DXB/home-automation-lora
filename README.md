@@ -22,3 +22,21 @@ By using LoRa, this architecture bypasses the strict range limitations of Wi-Fi 
 
 ## Scaling
 To add more sensors (like soil moisture meters or door contacts) to the field, you do not need additional LoRa hardware. Simply configure the new BLE sensor's MAC address in the `lora-sender.yaml`, add its ID to the `packet_transport` block, and create a matching receiving sensor in `lora-receiver.yaml`.
+
+## UK Deployment & Commissioning Guide
+When transferring this setup from the test bench to the live UK deployment (2BG Home Assistant & Allotment), follow these exact steps to ensure the off-grid node functions correctly without killing its battery.
+
+### 1. Update ESPHome
+Ensure the ESPHome Add-on on your UK Home Assistant server is fully up to date so that it includes native support for the `packet_transport` component.
+
+### 2. Configure the Receiver (Home Node)
+1. Open the ESPHome dashboard in your UK Home Assistant.
+2. Create a new device named `lora-receiver` and paste the contents of `lora-receiver.yaml` into it.
+3. Update the `wifi:` block to use your UK Wi-Fi credentials (or ensure your UK `secrets.yaml` matches).
+4. Flash the device.
+
+### 3. Configure the Sender (Off-Grid Node) - CRITICAL STEP
+1. Create a new device named `lora-sender` in the UK ESPHome dashboard and paste the contents of `lora-sender.yaml`.
+2. **WARNING:** Before you hit install, you **MUST delete the `wifi:`, `api:`, and `ota:` blocks completely.**
+    *   *Why?* If the ESP32 is instructed to look for Wi-Fi and Home Assistant (`api:`) but cannot find them in the middle of a field, a safety watchdog will automatically reboot the chip every 15 minutes. This constant searching and rebooting will destroy your solar battery life.
+3. Flash the device via USB. The Sender will now run fully off-grid, permanently listening for Bluetooth and transmitting over LoRa without relying on Wi-Fi.
